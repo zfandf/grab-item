@@ -72,7 +72,8 @@ chrome.extension.onRequest.addListener(function(item) {
 
 // 这里的document代表了popup.html的文档流，所以也是注册这个页面中的dom事件
 document.addEventListener('DOMContentLoaded', function(){
-    document.getElementById('J_Submit').addEventListener('click', function(e){
+    var eSubmit = document.getElementById('J_Submit');
+    eSubmit.addEventListener('click', function(e){
         var oItem = {};
         oItem.item_id = +document.getElementById('item_id').value;
         oItem.title = document.getElementById('title').value.trim();
@@ -94,22 +95,27 @@ document.addEventListener('DOMContentLoaded', function(){
         var eImgs = document.getElementById('J_ItemImgs').children;
         for (var i = 0, iLen = eImgs.length; i < iLen; i++) {
             if (eImgs[i].src != sPicUrl) {
-                oItem.item_imgs.push(eImgs[i].src);
+                oItem.item_imgs.push({"url": eImgs[i].src});
             }
         }
 
-        // document.getElementById('J_Submit').setAttribute('disabled',true);
+        eSubmit.setAttribute('disabled',true);
+        eNotice.innerHTML = '正在更新';
         var xhr = new XMLHttpRequest();
         xhr.open("POST", GRAB_URL, true);
         xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded");
         var data = JSON.stringify(oItem);
+        var eNotice = document.getElementById('J_Notice');
         xhr.onreadystatechange = function() {
             if (xhr.readyState == 4) {
                 // JSON解析器不会执行攻击者设计的脚本.
                 var resp = JSON.parse(xhr.responseText);
-                if (resp.error_response.code == 0) {
-
+                if (resp.error_response == 0) {
+                    eNotice.innerHTML = '更新成功';
+                } else {
+                    eNotice.innerHTML = '更新失败';
                 }
+                eSubmit.setAttribute('disabled',false);
             }
         }
         xhr.send('action=item&item='+data);
