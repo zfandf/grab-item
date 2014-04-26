@@ -31,9 +31,6 @@ var tagElm = document.getElementById('J_Tag');
 var subElm = document.getElementById('J_SubTag');
 var sPicUrl = '';
 
-var gServer = {
-};
-
 //页面返回信息渲染
 chrome.extension.onRequest.addListener(function(item) {
     // document.body.innerHTML = links.title;
@@ -186,7 +183,7 @@ function renderTagSelect(tags, elm) {
 function sendXhr(xhrSuccess, oParam) {
     console.log(oParam);
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", gServer.url+"ajax/ajax_select_chrome.php", true);
+    xhr.open("POST", GRAB_URL, true);
     xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded");
     // xhr.setRequestHeader("Content-length", data.length);
     xhr.onreadystatechange = function() {
@@ -251,7 +248,7 @@ document.addEventListener('DOMContentLoaded', function(){
         }
         document.getElementById('J_Submit').setAttribute('disabled',true);
         var xhr = new XMLHttpRequest();
-        xhr.open("POST", gServer.url+"ajax/ajax_select_chrome.php", true);
+        xhr.open("POST", GRAB_URL, true);
         xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded");
         var data = JSON.stringify(oItem);
         // xhr.setRequestHeader("Content-length", data.length);

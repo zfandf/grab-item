@@ -1,1 +1,1 @@
-var API_URL = '';
+var GRAB_URL = 'http://tadminzb.tshenbian.com/ajax/chrome_grab.php';
