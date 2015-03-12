@@ -67,13 +67,16 @@ chrome.extension.onRequest.addListener(function(item) {
  * 这个JS文件表示对popup.html文档的操作
  * 比如直接在这里写的document也是代表了popup.html的文档流
  */
-
 // 这里的document代表了popup.html的文档流，所以也是注册这个页面中的dom事件
 document.addEventListener('DOMContentLoaded', function(){
     document.getElementById('J_Submit').addEventListener('click', function(e){
         var action = 'updateItem';
         var xhr = new XMLHttpRequest();
-        xhr.open("POST", "http://adminzb.tshenbian.com/ajax/ajax_chrome.php", true);
+        var url = '';
+        if (typeof REQUEST_URL != 'undefined') {
+            url = REQUEST_URL;
+        }
+        xhr.open("POST", url, true);
         xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded");
         // xhr.setRequestHeader("Content-length", data.length);
         xhr.onreadystatechange = function() {
