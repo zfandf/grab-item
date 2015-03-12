@@ -11,6 +11,8 @@ chrome.windows.getCurrent(function (currentWindow) {
         } else if (url.match(/detail.tmall.com/g)) {
             chrome.tabs.query({active: true, windowId: currentWindow.id}, function(activeTabs) {
                 chrome.tabs.executeScript(activeTabs[0].id, {file: 'tmall.js', allFrames: true});});
+        } else {
+            window.close();
         }
     });
 }); 
@@ -20,27 +22,22 @@ chrome.windows.getCurrent(function (currentWindow) {
  * 比如直接在这里写的document也是代表了popup.html的文档流
  */
 var oItem = {};
-var sPicUrl = '';
 
 //页面返回信息渲染
 chrome.extension.onRequest.addListener(function(item) {
-    // document.body.innerHTML = links.title;
+    
     document.getElementById('item_id').value = item.item_id;
-    document.getElementById('title').value = '♥'+item.title;
+    document.getElementById('item_id').setAttribute('disabled', true);
     document.getElementById('price').value = item.price;
     if (typeof item.promo_price != 'undefined') {
         document.getElementById('price').value = item.promo_price;
-        item.price = item.promo_price;
     }
     if (typeof item.volume != 'undefined') {
         document.getElementById('volume').value = item.volume;
+        oItem.volume = item.volume;
     }
-    if (typeof item.recommend != 'undefined') {
-        document.getElementById('recommend').value = item.recommend;
-    }
-
     var imgBoxElm = document.getElementById('J_ItemImgs');
-    if (item.images) {
+    if (typeof item.images != 'undefined') {
         for (var i = 0, len = item.images.length; i < len; i++) {
             var img = new Image();
             img.src = item.images[i];
@@ -48,18 +45,19 @@ chrome.extension.onRequest.addListener(function(item) {
             img.setAttribute('key', i);
             if (i == 0) {
                 img.className = 'img-polaroid select';
-                sPicUrl = item.images[i];
+                oItem.pic_url = img.src;
             }
             imgBoxElm.appendChild(img);
         }
     }
+    oItem.item_id = item.item_id;
+    oItem.price = document.getElementById('price').value;
     var imgsElm = imgBoxElm.children;
-    console.log();
     for (var i = 0, len = imgsElm.length; i < len; i++) {
         imgsElm[i].onclick = function(){
             imgBoxElm.getElementsByClassName('select')[0].className = 'img-polaroid';
             this.className = 'img-polaroid select';
-            sPicUrl = this.src;
+            oItem.pic_url = this.src;
         }
     }
 });
@@ -69,55 +67,50 @@ chrome.extension.onRequest.addListener(function(item) {
  * 这个JS文件表示对popup.html文档的操作
  * 比如直接在这里写的document也是代表了popup.html的文档流
  */
-
 // 这里的document代表了popup.html的文档流，所以也是注册这个页面中的dom事件
 document.addEventListener('DOMContentLoaded', function(){
-    var eSubmit = document.getElementById('J_Submit');
-    eSubmit.addEventListener('click', function(e){
-        var oItem = {};
-        oItem.item_id = +document.getElementById('item_id').value;
-        oItem.title = document.getElementById('title').value.trim();
-        oItem.volume = +document.getElementById('volume').value;
-        oItem.price = +document.getElementById('price').value;
-        oItem.recommend = document.getElementById('recommend').value.trim();
-        oItem.description = document.getElementById('description').value.trim();
-        oItem.pic_url = sPicUrl;
-        if (!oItem.title) {
-            alert('商品标题不能为空');
-            return false;
-        }
-        if (!oItem.price) {
-            alert('商品价格为大于0的数');
-            return false;
-        }
-
-        oItem.item_imgs = [];
-        var eImgs = document.getElementById('J_ItemImgs').children;
-        for (var i = 0, iLen = eImgs.length; i < iLen; i++) {
-            if (eImgs[i].src != sPicUrl) {
-                oItem.item_imgs.push({"url": eImgs[i].src});
-            }
-        }
-
-        eSubmit.setAttribute('disabled',true);
-        eNotice.innerHTML = '正在更新';
+    document.getElementById('J_Submit').addEventListener('click', function(e){
+        var action = 'updateItem';
         var xhr = new XMLHttpRequest();
-        xhr.open("POST", GRAB_URL, true);
+        var url = '';
+        if (typeof REQUEST_URL != 'undefined') {
+            url = REQUEST_URL;
+        }
+        xhr.open("POST", url, true);
         xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-        var data = JSON.stringify(oItem);
-        var eNotice = document.getElementById('J_Notice');
+        // xhr.setRequestHeader("Content-length", data.length);
         xhr.onreadystatechange = function() {
+            console.log(xhr.responseText);
             if (xhr.readyState == 4) {
                 // JSON解析器不会执行攻击者设计的脚本.
-                var resp = JSON.parse(xhr.responseText);
-                if (resp.error_response == 0) {
-                    eNotice.innerHTML = '更新成功';
+                if (xhr.responseText == 1) {
+                    if (confirm('更新完成，点击确认关闭窗口或者取消继续修改商品信息')) {
+                        window.close();
+                    }
                 } else {
-                    eNotice.innerHTML = '更新失败';
+                    if (confirm('更新失败，点击确认关闭窗口或者取消继续修改商品信息')) {
+                        window.close();
+                    }
                 }
-                eSubmit.setAttribute('disabled',false);
             }
+        } 
+        var volumeElm = document.getElementById('volume');
+        if (1*volumeElm.value > 0) {
+            oItem.volume = volumeElm.value;
+        } else {
+            delete oItem.volume;
         }
-        xhr.send('action=item&item='+data);
+        var priceElm = document.getElementById('price');
+        if (1*priceElm.value > 0) {
+            oItem.price = priceElm.value;
+        } else {
+            delete oItem.price;
+        }
+        if (typeof oItem.item_id == 'undefined' || oItem.item_id == 0 || oItem.item_id == '') {
+            alert('没有拿到商品ID，不能进行提交');
+            return false;
+        }
+        console.log('action='+action+'&data='+JSON.stringify(oItem));
+        xhr.send('action='+action+'&data='+JSON.stringify(oItem));
     });        
 });

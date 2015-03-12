@@ -17,26 +17,25 @@ oParam.pic_url = oParam.images[0];
 
 //原始价格
 oParam.price = document.getElementById('J_StrPrice').getElementsByClassName('tb-rmb-num')[0].innerHTML.split('-')[0].trim();
-console.log(oParam);
 
 //特价
-var promoElm = document.getElementById('J_PromoPrice');
-if (promoElm != null && typeof promoElm.style != 'undefined' && promoElm.style.display != 'none' && !hasClass(promoElm, 'tb-hidden')) {
-    oParam.promo_price = promoElm.getElementsByClassName('tb-rmb-num')[0].innerHTML.split('</em>')[1].trim();
+var promoElm = document.getElementById('J_Price');
+if (promoElm != null) {
+    oParam.promo_price = promoElm.innerHTML.trim();
 }
 
-//销量
 var volumeElm = document.getElementsByClassName('J_TDealCount')[0];
 if (typeof volumeElm != 'undefined') {
     oParam.volume = volumeElm.innerText;
 }
 
 //标题
-oParam.title = document.getElementById('detail').getElementsByTagName('h3')[0].innerHTML.replace(/<[^>].*?>/g,"");
+var hElm = document.getElementById('J_Title');
+oParam.title = hElm.getElementsByTagName('h3')[0].innerHTML.replace(/<[^>].*?>/g,"");
+oParam.desc = hElm.getElementsByTagName('p')[0].innerHTML.trim();
 
 //商品ID
-oParam.item_id = document.forms.J_FrmBid.getElementsByTagName('input')[2].value;
-console.log(oParam);
+oParam.item_id = document.forms.J_FrmBid.item_id.value;
 
 chrome.extension.sendRequest(oParam);
 

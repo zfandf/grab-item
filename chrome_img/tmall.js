@@ -9,7 +9,8 @@ var oParam = {};
 //附图
 thumbImgs = [].slice.apply(document.getElementById('J_UlThumb').getElementsByTagName('img'));
 oParam.images = thumbImgs.map(function(element) {
-    return element.getAttribute('src').split('.jpg_')[0]+'.jpg';
+	var src = element.getAttribute('src').split('.jpg_')[0]+'.jpg';
+    return src;
 });
 
 //主图
@@ -27,19 +28,18 @@ function hasClass(node, className) {
 }
 
 //特价
-var promoElm = document.getElementById('J_PromoPrice');
+var promoElm = document.getElementsByClassName('tm-promo-price')[0];
 if (promoElm.getElementsByClassName('tm-price').length != 0) {
     oParam.promo_price = promoElm.getElementsByClassName('tm-price')[0].innerHTML.trim();
 }
 
 var hElm = document.getElementById('detail').getElementsByClassName('tb-detail-hd')[0];
 //标题
-oParam.title = hElm.getElementsByTagName('h3')[0].innerHTML.trim();
+oParam.title = hElm.getElementsByTagName('h1')[0].innerHTML.trim();
 oParam.desc = hElm.getElementsByTagName('p')[0].innerHTML.trim();
 
 //商品ID
 oParam.item_id = document.getElementById('LineZing').attributes.itemid.value;
-console.log(oParam);
 
 chrome.extension.sendRequest(oParam);
 
