@@ -1,0 +1,1 @@
+var REQUEST_URL = 'http://adminzb.tshenbian.com/ajax/ajax_chrome.php';
