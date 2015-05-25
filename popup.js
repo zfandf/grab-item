@@ -40,7 +40,8 @@ chrome.extension.onRequest.addListener(function(item) {
     if (typeof item.images != 'undefined') {
         for (var i = 0, len = item.images.length; i < len; i++) {
             var img = new Image();
-            img.src = item.images[i];
+            // bug fixed
+            img.src = (item.images[i].indexOf('http://') === 0 && item.images[i].indexOf('https://') === 0) ? item.images[i] : 'http://' + item.images[i];
             img.className = 'img-polaroid';
             img.setAttribute('key', i);
             if (i == 0) {
