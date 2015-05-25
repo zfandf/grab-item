@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', function(){
                     }
                 }
             }
-        } 
+        };
         var volumeElm = document.getElementById('volume');
         if (1*volumeElm.value > 0) {
             oItem.volume = volumeElm.value;
